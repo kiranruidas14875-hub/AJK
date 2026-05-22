@@ -1,0 +1,33 @@
+name: ABHI VIRTUAL
+
+on:
+  workflow_dispatch:
+    inputs:
+      ts_authkey:
+        description: "Tailscale Auth Key"
+        required: true
+        type: string
+
+jobs:
+  rdp:
+    runs-on: windows-latest
+    timeout-minutes: 305
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pre-Create Directories
+        run: |
+          $sec = ConvertTo-SecureString "Rdp!9Xq#2025" -AsPlainText -Force
+          if (-not (Get-LocalUser -Name "ABHI" -ErrorAction SilentlyContinue)) {
+            New-LocalUser -Name "ABHI" -Password $sec -AccountNeverExpires
+            Add-LocalGroupMember Administrators "ABHI"
+          }
+          New-Item -Path "C:\Users\ABHI\AppData\Local\Google\Chrome\User Data" -ItemType Directory -Force
+          New-Item -Path "C:\PersistentData" -ItemType Directory -Force
+          New-Item -Path "C:\Users\ABHI\Downloads" -ItemType Directory -Force
+
+      - name: Disable Lock Screen & Sleep (Stability Fix)
+        shell: powershell
+        run
